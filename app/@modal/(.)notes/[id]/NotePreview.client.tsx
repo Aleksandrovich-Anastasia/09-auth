@@ -35,7 +35,6 @@ export default function NotePreview({ id }: NotePreviewProps) {
     );
   }
 
-  // Handle error state
   if (isError) {
     return (
       <Modal onClose={handleClose} showCloseButton>
@@ -49,7 +48,6 @@ export default function NotePreview({ id }: NotePreviewProps) {
     );
   }
 
-  // Handle case when note is not found
   if (!note) {
     return (
       <Modal onClose={handleClose} showCloseButton>
@@ -60,7 +58,6 @@ export default function NotePreview({ id }: NotePreviewProps) {
     );
   }
 
-  // Format the date
   const formattedDate = new Date(note.createdAt).toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'long',

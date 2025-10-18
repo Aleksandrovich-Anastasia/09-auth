@@ -3,7 +3,7 @@ import { api } from "./api";
 
 function getHeaders() {
   const cookieStore = cookies();
-  const cookie = cookieStore.toString(); // Отримати всі cookies
+  const cookie = cookieStore.toString(); 
   return { headers: { Cookie: cookie } };
 }
 

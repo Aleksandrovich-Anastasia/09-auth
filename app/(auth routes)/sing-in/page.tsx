@@ -5,9 +5,17 @@ import { useRouter } from "next/navigation";
 import { login } from "@/lib/api/clientApi";
 import css from "./SignInPage.module.css";
 
+interface ApiError {
+  response?: {
+    data?: {
+      message?: string;
+    };
+  };
+}
+
 const SignInPage = () => {
   const router = useRouter();
-  const [error, setError] = useState("");
+  const [error, setError] = useState<string>("");
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -19,9 +27,10 @@ const SignInPage = () => {
 
     try {
       await login(email, password);
-      router.push("/profile"); // редірект на профіль після успішного логіну
-    } catch (err: any) {
-      setError(err.response?.data?.message || "Login failed");
+      router.push("/profile"); 
+    } catch (err: unknown) {
+      const apiErr = err as ApiError;
+      setError(apiErr.response?.data?.message || "Login failed");
     }
   };
 

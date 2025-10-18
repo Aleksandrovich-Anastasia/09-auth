@@ -5,6 +5,14 @@ import { useRouter } from "next/navigation";
 import { register } from "@/lib/api/clientApi";
 import css from "./SignUpPage.module.css";
 
+interface ApiError {
+  response?: {
+    data?: {
+      message?: string;
+    };
+  };
+}
+
 export default function SignUpPage() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
@@ -19,9 +27,10 @@ export default function SignUpPage() {
 
     try {
       await register(email, password);
-      router.push("/profile"); // редірект після успішної реєстрації
-    } catch (err: any) {
-      setError(err?.response?.data?.message || "Registration failed");
+      router.push("/profile");
+    } catch (err: unknown) {
+      const apiErr = err as ApiError;
+      setError(apiErr.response?.data?.message || "Registration failed");
     }
   };
 

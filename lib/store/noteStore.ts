@@ -51,7 +51,7 @@ function readDraftFromStorage(): Draft {
     }
 
     return initialDraft;
-  } catch (e) {
+  } catch {
     return initialDraft;
   }
 }
@@ -62,7 +62,7 @@ interface NoteStore {
   clearDraft: () => void;
 }
 
-export const useNoteStore = create<NoteStore>((set, get) => ({
+export const useNoteStore = create<NoteStore>((set) => ({
   draft: readDraftFromStorage(),
 
   setDraft: (note) => {
@@ -70,8 +70,12 @@ export const useNoteStore = create<NoteStore>((set, get) => ({
       const newDraft = { ...state.draft, ...note };
       if (typeof window !== "undefined") {
         try {
-          localStorage.setItem(STORAGE_KEY, JSON.stringify({ state: { draft: newDraft } }));
-        } catch (e) {
+          localStorage.setItem(
+            STORAGE_KEY,
+            JSON.stringify({ state: { draft: newDraft } })
+          );
+        } catch {
+         
         }
       }
       return { draft: newDraft };
@@ -83,7 +87,8 @@ export const useNoteStore = create<NoteStore>((set, get) => ({
       if (typeof window !== "undefined") {
         try {
           localStorage.removeItem(STORAGE_KEY);
-        } catch (e) {
+        } catch {
+      
         }
       }
       return { draft: initialDraft };

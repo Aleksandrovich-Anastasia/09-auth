@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import css from "./Profile.module.css";
 
 export const metadata: Metadata = {
@@ -10,7 +11,7 @@ export const metadata: Metadata = {
     url: "/profile",
     images: [
       {
-        url: "/default-avatar.png", // можна замінити на реальну картинку
+        url: "/default-avatar.png",
         width: 1200,
         height: 630,
         alt: "Profile Page",
@@ -30,7 +31,7 @@ export default function ProfilePage() {
           </a>
         </div>
         <div className={css.avatarWrapper}>
-          <img
+          <Image
             src="https://ac.goit.global/img/photo.jpg"
             alt="User Avatar"
             width={120}
