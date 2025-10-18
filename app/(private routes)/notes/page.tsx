@@ -3,12 +3,15 @@
 import { useQuery } from '@tanstack/react-query';
 import NoteList from '@/components/NoteList/NoteList';
 import { fetchNotes } from '@/lib/api/clientApi';
-import type { Note } from '@/types/note';
+import type { FetchNotesResponse } from '@/lib/api/clientApi';
 
 export default function NotesPage() {
-  const { data: notes = [], isLoading, isError, error } = useQuery<Note[]>({
-    queryKey: ['notes'],
-    queryFn: fetchNotes,
+  const { data, isLoading, isError, error } = useQuery<FetchNotesResponse>({
+    queryKey: ['notes', { page: 1, perPage: 10 }], 
+    queryFn: ({ queryKey }) => {
+      const [, params] = queryKey as [string, { page: number; perPage: number }];
+      return fetchNotes(params);
+    },
     refetchOnWindowFocus: false,
   });
 
@@ -24,5 +27,5 @@ export default function NotesPage() {
     );
   }
 
-  return <NoteList notes={notes} />;
+  return <NoteList notes={data?.notes ?? []} />;
 }
