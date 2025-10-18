@@ -15,7 +15,6 @@ const NoteForm = () => {
   const queryClient = useQueryClient();
   const { draft, setDraft, clearDraft } = useNoteStore();
 
-  // Гарантуємо, що state завжди string
   const [title, setTitle] = useState<string>(draft.title ?? "");
   const [content, setContent] = useState<string>(draft.content ?? "");
   const [tag, setTag] = useState<Note["tag"]>(
@@ -24,12 +23,10 @@ const NoteForm = () => {
 
   const [errors, setErrors] = useState<{ title?: string; content?: string; tag?: string }>({});
 
-  // Синхронізація з draft у localStorage
   useEffect(() => {
     setDraft({ title, content, tag });
   }, [title, content, tag, setDraft]);
 
-  // Валідація форми
   const validate = (): boolean => {
     const newErrors: typeof errors = {};
 
@@ -45,10 +42,9 @@ const NoteForm = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  // Мутація створення нотатки
   const mutation = useMutation({
     mutationFn: () => 
-      createNote({ title, content, tag }), // типи точно string
+      createNote({ title, content, tag }), 
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["notes"] });
       clearDraft();

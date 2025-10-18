@@ -11,7 +11,7 @@ const AuthNavigation = () => {
 
   const handleLogout = () => {
     clearIsAuthenticated();
-    router.push("/sign-in"); // після виходу редірект на Login
+    router.push("/sign-in"); 
   };
 
   return (

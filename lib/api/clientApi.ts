@@ -3,15 +3,30 @@ import type { Note } from "../../types/note";
 import type { User } from "../../types/user";
 
 // --- Notes ---
-export const fetchNotes = async (): Promise<Note[]> => {
-  const { data } = await api.get<Note[]>("/notes");
-  return data;
+export type FetchNotesResponse = {
+  notes: Note[];
+  totalPages: number;
 };
+
+export const fetchNotes = async (params?: {
+  page?: number;
+  perPage?: number;
+  search?: string;
+  tag?: string;
+}): Promise<FetchNotesResponse> => {
+  const { data, headers } = await api.get<Note[]>("/notes", { params });
+
+  const totalPages = headers["x-total-pages"] ? Number(headers["x-total-pages"]) : 1;
+
+  return { notes: data, totalPages };
+};
+
 
 export const fetchNoteById = async (id: string): Promise<Note> => {
   const { data } = await api.get<Note>(`/notes/${id}`);
   return data;
 };
+
 
 export const createNote = async (
   note: Pick<Note, "title" | "content" | "tag">
