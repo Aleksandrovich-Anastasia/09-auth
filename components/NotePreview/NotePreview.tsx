@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Modal from '@/components/Modal/Modal';
-import { fetchNoteById } from '@/lib/api';
+import { fetchNoteById } from '@/lib/api/api';
 import type { Note } from '@/types/note';
 import Loader from '@/components/Loader/Loader';
 

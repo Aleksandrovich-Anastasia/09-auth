@@ -1,0 +1,72 @@
+import { api } from "./api";
+import type { Note } from "../../types/note";
+import type { User } from "../../types/user";
+
+// --- Notes ---
+export const fetchNotes = async (): Promise<Note[]> => {
+  const { data } = await api.get<Note[]>("/notes");
+  return data;
+};
+
+export const fetchNoteById = async (id: string): Promise<Note> => {
+  const { data } = await api.get<Note>(`/notes/${id}`);
+  return data;
+};
+
+export const createNote = async (
+  note: Pick<Note, "title" | "content" | "tag">
+): Promise<Note> => {
+  const { data } = await api.post<Note>("/notes", note);
+  return data;
+};
+
+export const deleteNote = async (id: string): Promise<{ success: boolean }> => {
+  const { data } = await api.delete<{ success: boolean }>(`/notes/${id}`);
+  return data;
+};
+
+// --- Auth ---
+export const register = async (
+  email: string,
+  password: string
+): Promise<{ user: User }> => {
+  const { data } = await api.post<{ user: User }>("/auth/register", {
+    email,
+    password,
+  });
+  return data;
+};
+
+export const login = async (
+  email: string,
+  password: string
+): Promise<{ user: User }> => {
+  const { data } = await api.post<{ user: User }>("/auth/login", {
+    email,
+    password,
+  });
+  return data;
+};
+
+export const logout = async (): Promise<{ success: boolean }> => {
+  const { data } = await api.post<{ success: boolean }>("/auth/logout");
+  return data;
+};
+
+export const checkSession = async (): Promise<{ user: User | null }> => {
+  const { data } = await api.get<{ user: User | null }>("/auth/session");
+  return data;
+};
+
+// --- Profile ---
+export const getMe = async (): Promise<User> => {
+  const { data } = await api.get<User>("/users/me");
+  return data;
+};
+
+export const updateMe = async (
+  payload: Partial<Pick<User, "username" | "email">>
+): Promise<User> => {
+  const { data } = await api.patch<User>("/users/me", payload);
+  return data;
+};
