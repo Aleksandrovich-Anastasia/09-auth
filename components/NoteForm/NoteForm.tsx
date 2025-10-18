@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { createNote } from "@/lib/api/api";
+import { createNote } from "@/lib/api/clientApi";
 import { useNoteStore } from "@/lib/store/noteStore";
 import type { Note } from "@/types/note";
 import css from "./NoteForm.module.css";
@@ -15,20 +15,24 @@ const NoteForm = () => {
   const queryClient = useQueryClient();
   const { draft, setDraft, clearDraft } = useNoteStore();
 
-  const [title, setTitle] = useState(draft.title || "");
-  const [content, setContent] = useState(draft.content || "");
-  const [tag, setTag] = useState<Note["tag"]>(() =>
+  // Гарантуємо, що state завжди string
+  const [title, setTitle] = useState<string>(draft.title ?? "");
+  const [content, setContent] = useState<string>(draft.content ?? "");
+  const [tag, setTag] = useState<Note["tag"]>(
     TAGS.includes(draft.tag as Note["tag"]) ? (draft.tag as Note["tag"]) : "Todo"
   );
 
   const [errors, setErrors] = useState<{ title?: string; content?: string; tag?: string }>({});
 
+  // Синхронізація з draft у localStorage
   useEffect(() => {
     setDraft({ title, content, tag });
   }, [title, content, tag, setDraft]);
 
-  const validate = () => {
+  // Валідація форми
+  const validate = (): boolean => {
     const newErrors: typeof errors = {};
+
     if (!title.trim()) newErrors.title = "Title is required!";
     else if (title.length < 3) newErrors.title = "Title must be at least 3 characters";
     else if (title.length > 50) newErrors.title = "Title cannot exceed 50 characters";
@@ -41,11 +45,13 @@ const NoteForm = () => {
     return Object.keys(newErrors).length === 0;
   };
 
+  // Мутація створення нотатки
   const mutation = useMutation({
-    mutationFn: (note: Partial<Note>) => createNote(note),
+    mutationFn: () => 
+      createNote({ title, content, tag }), // типи точно string
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["notes"] });
-      clearDraft(); 
+      clearDraft();
       router.push("/notes");
     },
   });
@@ -53,7 +59,7 @@ const NoteForm = () => {
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!validate()) return;
-    mutation.mutate({ title, content, tag });
+    mutation.mutate();
   };
 
   const handleCancel = () => {

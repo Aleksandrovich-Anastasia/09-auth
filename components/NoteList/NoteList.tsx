@@ -1,7 +1,7 @@
 'use client';
 
 import type { Note } from '@/types/note';
-import { deleteNote } from '../../lib/api/api';
+import { deleteNote } from '../../lib/api/clientApi';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import Link from 'next/link';
 import css from './NoteList.module.css';
