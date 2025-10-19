@@ -3,7 +3,7 @@ import { getQueryClient } from '@/lib/queryClient';
 import { fetchNoteById } from '@/lib/api/serverApi';
 import NotePreview from '@/components/NotePreview/NotePreview';
 import type { Metadata } from 'next';
-import css from '../NotesPage.module.css';
+import css from '../../notes/filter/[...slug]/NotesPage.module.css';
 
 export async function generateMetadata({
   params,
