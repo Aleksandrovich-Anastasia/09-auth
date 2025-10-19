@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import { api } from "./api";
 import type { Note } from "@/types/note";
 import type { User } from "@/types/user";
+import type { AxiosResponse } from "axios";
 
 export type SessionResult = {
   accessToken?: string;
@@ -31,9 +32,17 @@ export const getMe = async (): Promise<User> => {
   return data;
 };
 
-export const checkSession = async (refreshToken?: string): Promise<SessionResult> => {
+export const checkSession = async (
+  refreshToken?: string
+): Promise<AxiosResponse<SessionResult>> => {
   const cookieStore = cookies();
-  const cookie = refreshToken ? `refreshToken=${refreshToken}` : cookieStore.toString();
-  const response = await api.get<SessionResult>("/auth/session", { headers: { Cookie: cookie } });
-  return response.data;
+  const cookie = refreshToken
+    ? `refreshToken=${refreshToken}`
+    : cookieStore.toString();
+
+  const response = await api.get<SessionResult>("/auth/session", {
+    headers: { Cookie: cookie },
+  });
+
+  return response; 
 };
