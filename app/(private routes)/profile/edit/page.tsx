@@ -5,11 +5,13 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import css from "./EditProfilePage.module.css";
 import { getMe, updateMe } from "@/lib/api/clientApi";
-import { User } from "@/types/user";
+import type { User } from "@/types/user";
+import { useAuthStore } from "@/lib/store/authStore";
 
 export default function EditProfilePage() {
   const router = useRouter();
-  const [user, setUser] = useState<User | null>(null);
+  const { setUser } = useAuthStore();
+  const [user, setLocalUser] = useState<User | null>(null);
   const [username, setUsername] = useState("");
   const [loading, setLoading] = useState(true);
 
@@ -17,7 +19,7 @@ export default function EditProfilePage() {
     const loadUser = async () => {
       try {
         const me = await getMe();
-        setUser(me);
+        setLocalUser(me);
         setUsername(me.username);
       } catch (err) {
         console.error("Failed to load user:", err);
@@ -32,7 +34,9 @@ export default function EditProfilePage() {
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await updateMe({ username });
+      const updatedUser: User = await updateMe({ username });
+      setLocalUser(updatedUser);
+      setUser(updatedUser);
       router.push("/profile");
     } catch (err) {
       console.error("Failed to update user:", err);
@@ -57,7 +61,7 @@ export default function EditProfilePage() {
         <h1 className={css.formTitle}>Edit Profile</h1>
 
         <Image
-          src={user.avatar}
+          src={user.avatar || "/default-avatar.png"}
           alt="User Avatar"
           width={120}
           height={120}

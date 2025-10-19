@@ -3,15 +3,20 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/lib/store/authStore";
+import { logout } from "@/lib/api/clientApi";
 import css from "./AuthNavigation.module.css";
 
 const AuthNavigation = () => {
   const router = useRouter();
   const { isAuthenticated, user, clearIsAuthenticated } = useAuthStore();
 
-  const handleLogout = () => {
-    clearIsAuthenticated();
-    router.push("/sign-in"); 
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } finally {
+      clearIsAuthenticated();
+      router.push("/sign-in");
+    }
   };
 
   return (

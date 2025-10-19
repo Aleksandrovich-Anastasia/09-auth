@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { register } from "@/lib/api/clientApi";
+import { useAuthStore } from "@/lib/store/authStore";
+import type { User } from "@/types/user";
 import css from "./SignUpPage.module.css";
 
 interface ApiError {
@@ -16,6 +18,7 @@ interface ApiError {
 export default function SignUpPage() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
+  const { setUser } = useAuthStore();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -26,12 +29,15 @@ export default function SignUpPage() {
     const password = formData.get("password") as string;
 
     try {
-      await register(email, password);
-      router.push("/profile");
-    } catch (err: unknown) {
-      const apiErr = err as ApiError;
-      setError(apiErr.response?.data?.message || "Registration failed");
-    }
+  const response = await register(email, password);
+  const user: User = response.user;
+  setUser(user);
+  router.push("/profile");
+} catch (err: unknown) {
+  const apiErr = err as ApiError;
+  setError(apiErr.response?.data?.message || "Registration failed");
+}
+
   };
 
   return (

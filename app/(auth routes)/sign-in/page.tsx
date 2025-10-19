@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { login } from "@/lib/api/clientApi";
+import { useAuthStore } from "@/lib/store/authStore";
+import type { User } from "@/types/user";
 import css from "./SignInPage.module.css";
 
 interface ApiError {
@@ -16,6 +18,7 @@ interface ApiError {
 const SignInPage = () => {
   const router = useRouter();
   const [error, setError] = useState<string>("");
+  const { setUser } = useAuthStore();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -26,12 +29,15 @@ const SignInPage = () => {
     const password = formData.get("password") as string;
 
     try {
-      await login(email, password);
-      router.push("/profile"); 
-    } catch (err: unknown) {
-      const apiErr = err as ApiError;
-      setError(apiErr.response?.data?.message || "Login failed");
-    }
+  const response = await login(email, password);
+  const user: User = response.user;
+  setUser(user);
+  router.push("/profile");
+} catch (err: unknown) {
+  const apiErr = err as ApiError;
+  setError(apiErr.response?.data?.message || "Login failed");
+}
+
   };
 
   return (
