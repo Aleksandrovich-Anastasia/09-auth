@@ -1,7 +1,7 @@
 import { api } from "./api";
 import type { Note } from "../../types/note";
 import type { User } from "../../types/user";
-import { useAuthStore } from "../store/authStore"; 
+import { useAuthStore } from "../store/authStore";
 
 // --- Notes ---
 export type FetchNotesResponse = {
@@ -16,7 +16,9 @@ export const fetchNotes = async (params?: {
   tag?: string;
 }): Promise<FetchNotesResponse> => {
   const { data, headers } = await api.get<Note[]>("/notes", { params });
-  const totalPages = headers["x-total-pages"] ? Number(headers["x-total-pages"]) : 1;
+  const totalPages = headers["x-total-pages"]
+    ? Number(headers["x-total-pages"])
+    : 1;
   return { notes: data, totalPages };
 };
 
@@ -32,11 +34,14 @@ export const createNote = async (
   return data;
 };
 
-export const deleteNote = async (id: string): Promise<{ success: boolean }> => {
+export const deleteNote = async (
+  id: string
+): Promise<{ success: boolean }> => {
   const { data } = await api.delete<{ success: boolean }>(`/notes/${id}`);
   return data;
 };
 
+// --- Auth ---
 export const register = async (
   email: string,
   password: string
@@ -46,9 +51,8 @@ export const register = async (
     password,
   });
 
-  const { setUser, setIsAuthenticated } = useAuthStore.getState();
+  const { setUser } = useAuthStore.getState();
   setUser(data.user);
-  setIsAuthenticated(true);
 
   return data;
 };
@@ -62,9 +66,8 @@ export const login = async (
     password,
   });
 
-  const { setUser, setIsAuthenticated } = useAuthStore.getState();
+  const { setUser } = useAuthStore.getState();
   setUser(data.user);
-  setIsAuthenticated(true);
 
   return data;
 };
@@ -81,11 +84,10 @@ export const logout = async (): Promise<{ success: boolean }> => {
 export const checkSession = async (): Promise<{ user: User | null }> => {
   const { data } = await api.get<{ user: User | null }>("/auth/session");
 
-  const { setUser, setIsAuthenticated, clearIsAuthenticated } = useAuthStore.getState();
+  const { setUser, clearIsAuthenticated } = useAuthStore.getState();
 
   if (data.user) {
     setUser(data.user);
-    setIsAuthenticated(true);
   } else {
     clearIsAuthenticated();
   }

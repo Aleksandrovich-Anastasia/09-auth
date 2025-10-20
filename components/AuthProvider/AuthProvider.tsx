@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { checkSession, logout } from "@/lib/api/clientApi";
+import { checkSession } from "@/lib/api/clientApi";
 import { useAuthStore } from "@/lib/store/authStore";
 import css from "./AuthProvider.module.css";
 import type { User } from "@/types/user";
@@ -14,10 +14,8 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const [isClient, setIsClient] = useState(false);
 
- 
   useEffect(() => {
     setIsClient(true);
-    console.log("API URL:", process.env.NEXT_PUBLIC_API_URL);
   }, []);
 
   useEffect(() => {
@@ -33,7 +31,6 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         } else {
           clearIsAuthenticated();
           if (pathname.startsWith("/profile") || pathname.startsWith("/notes")) {
-            await logout();
             router.push("/sign-in");
           }
         }
@@ -41,7 +38,6 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         console.error("Session check failed:", err);
         clearIsAuthenticated();
         if (pathname.startsWith("/profile") || pathname.startsWith("/notes")) {
-          await logout();
           router.push("/sign-in");
         }
       } finally {
