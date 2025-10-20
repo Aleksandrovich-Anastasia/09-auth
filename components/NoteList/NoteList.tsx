@@ -25,8 +25,8 @@ const NoteList = ({ notes }: NoteListProps) => {
 
   return (
     <ul className={css.list}>
-      {notes.map((note) => (
-        <li key={note.id} className={css.listItem}>
+      {notes.map((note, index) => (
+        <li key={note.id ?? index} className={css.listItem}>
           <h2 className={css.title}>{note.title}</h2>
           <p className={css.content}>{note.content}</p>
           <div className={css.footer}>

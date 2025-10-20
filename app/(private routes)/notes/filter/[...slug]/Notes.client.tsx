@@ -31,6 +31,7 @@ export default function NotesListClient({ tag }: NotesListClientProps) {
       queryFn: () =>
         fetchNotes({ page, perPage: 5, search: debouncedSearch, tag }),
     });
+  console.log("data from API:", data);
 
   if (isLoading) return <p>Loading...</p>;
   if (isError) return <p>Error: {error.message}</p>;
@@ -49,7 +50,7 @@ export default function NotesListClient({ tag }: NotesListClientProps) {
   + Add note
       </Link>
 
-      <NoteList notes={data?.notes ?? []} />
+      <NoteList notes={Object.values(data?.notes ?? {})?.flat()} />
 
       <Pagination
         page={page}

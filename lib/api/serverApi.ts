@@ -11,12 +11,27 @@ export type SessionResult = {
   refreshTokenExpiresIn?: number;
 } | null;
 
-async function getHeaders(): Promise<{ headers: { Cookie: string } }> {
-  const cookieStore = cookies();
-  const cookie = cookieStore.toString();
-  return { headers: { Cookie: cookie } };
+// --- Формуємо заголовки для запиту ---
+async function getHeaders(): Promise<{ headers: { Authorization?: string; Cookie?: string } }> {
+  const cookieStore = await cookies();
+
+  // Беремо токен доступу
+  const accessToken = cookieStore.get("accessToken")?.value;
+
+  // Додаємо всі cookies на випадок refreshToken/sessions
+  const allCookies = cookieStore.getAll()
+    .map((c: { name: string; value: string }) => `${c.name}=${c.value}`)
+    .join("; ");
+
+  return {
+    headers: {
+      Authorization: accessToken ? `Bearer ${accessToken}` : undefined,
+      Cookie: allCookies || undefined,
+    },
+  };
 }
 
+// --- Notes ---
 export const fetchNotes = async (): Promise<Note[]> => {
   const { data } = await api.get<Note[]>("/notes", await getHeaders());
   return data;
@@ -27,22 +42,35 @@ export const fetchNoteById = async (id: string): Promise<Note> => {
   return data;
 };
 
+// --- User ---
 export const getMe = async (): Promise<User> => {
   const { data } = await api.get<User>("/users/me", await getHeaders());
   return data;
 };
 
+// --- Auth ---
 export const checkSession = async (
   refreshToken?: string
 ): Promise<AxiosResponse<SessionResult>> => {
-  const cookieStore = cookies();
-  const cookie = refreshToken
-    ? `refreshToken=${refreshToken}`
-    : cookieStore.toString();
+  let cookieString: string;
+
+  if (refreshToken) {
+    cookieString = `refreshToken=${refreshToken}`;
+  } else {
+    const cookieStore = await cookies();
+    cookieString = cookieStore.getAll()
+      .map((c: { name: string; value: string }) => `${c.name}=${c.value}`)
+      .join("; ");
+  }
+
+  const accessToken = (await cookies()).get("accessToken")?.value;
 
   const response = await api.get<SessionResult>("/auth/session", {
-    headers: { Cookie: cookie },
+    headers: {
+      Authorization: accessToken ? `Bearer ${accessToken}` : undefined,
+      Cookie: cookieString || undefined,
+    },
   });
 
-  return response; 
+  return response;
 };
