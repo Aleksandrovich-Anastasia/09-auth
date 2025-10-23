@@ -34,11 +34,9 @@ export const createNote = async (
   return data;
 };
 
-export const deleteNote = async (
-  id: string
-): Promise<{ success: boolean }> => {
-  const { data } = await api.delete<{ success: boolean }>(`/notes/${id}`);
-  return data;
+export const deleteNote = async (id: string): Promise<Note> => {
+  const { data } = await api.delete<{ note: Note }>(`/notes/${id}`);
+  return data.note;
 };
 
 // --- Auth ---
@@ -100,8 +98,9 @@ export const getMe = async (): Promise<User> => {
   return data;
 };
 
+// Виправлена функція updateMe: можна оновлювати лише username
 export const updateMe = async (
-  payload: Partial<Pick<User, "username" | "email">>
+  payload: Partial<Pick<User, "username">>
 ): Promise<User> => {
   const { data } = await api.patch<User>("/users/me", payload);
   return data;
