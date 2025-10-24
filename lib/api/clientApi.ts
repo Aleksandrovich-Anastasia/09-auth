@@ -34,40 +34,28 @@ export const createNote = async (
   return data;
 };
 
-export const deleteNote = async (id: string): Promise<Note> => {
-  const { data } = await api.delete<{ note: Note }>(`/notes/${id}`);
-  return data.note;
+export const deleteNote = async (
+  id: string
+): Promise<{ success: boolean }> => {
+  const { data } = await api.delete<{ success: boolean }>(`/notes/${id}`);
+  return data;
 };
 
 // --- Auth ---
-export const register = async (
-  email: string,
-  password: string
-): Promise<{ user: User }> => {
-  const { data } = await api.post<{ user: User }>("/auth/register", {
-    email,
-    password,
-  });
-
+export const register = async (data: AuthRequest): Promise<User> => {
+  const { data: res } = await api.post<{ user: User }>("/auth/register", data);
   const { setUser } = useAuthStore.getState();
-  setUser(data.user);
-
-  return data;
+  setUser(res.user);
+  return res.user;
 };
 
-export const login = async (
-  email: string,
-  password: string
-): Promise<{ user: User }> => {
-  const { data } = await api.post<{ user: User }>("/auth/login", {
-    email,
-    password,
-  });
-
-  const { setUser } = useAuthStore.getState();
-  setUser(data.user);
-
-  return data;
+export type AuthRequest = {
+  email: string;
+  password: string;
+};
+export const login = async (data: AuthRequest) => {
+  const res = await api.post<User>('/auth/login', data);
+  return res.data;
 };
 
 export const logout = async (): Promise<{ success: boolean }> => {
@@ -98,9 +86,8 @@ export const getMe = async (): Promise<User> => {
   return data;
 };
 
-// Виправлена функція updateMe: можна оновлювати лише username
 export const updateMe = async (
-  payload: Partial<Pick<User, "username">>
+  payload: Partial<Pick<User, "username" | "email">>
 ): Promise<User> => {
   const { data } = await api.patch<User>("/users/me", payload);
   return data;

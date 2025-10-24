@@ -50,17 +50,8 @@ export async function middleware(req: NextRequest) {
   const isAuthPage = pathname.startsWith("/sign-in") || pathname.startsWith("/sign-up");
   const isPrivatePage = pathname.startsWith("/profile") || pathname.startsWith("/notes");
 
-  const isApiOrAjax =
-    pathname.startsWith("/api") ||
-    pathname.startsWith("/me") ||
-    pathname.startsWith("/session") ||
-    req.headers.get("x-requested-with") === "XMLHttpRequest";
-  if (isApiOrAjax) return NextResponse.next();
-
   if (accessToken) {
-    if (isAuthPage && pathname !== "/profile") {
-      return NextResponse.redirect(new URL("/profile", req.url));
-    }
+    if (isAuthPage) return NextResponse.redirect(new URL("/profile", req.url));
     return NextResponse.next();
   }
 
@@ -69,10 +60,9 @@ export async function middleware(req: NextRequest) {
       const session = (await checkSession(refreshToken)) as SessionResult;
 
       if (session?.accessToken) {
-        const res = (!isAuthPage || pathname === "/profile")
-          ? NextResponse.next()
-          : NextResponse.redirect(new URL("/profile", req.url));
-
+        const res = isAuthPage
+          ? NextResponse.redirect(new URL("/profile", req.url))
+          : NextResponse.next();
         setAuthCookies(res, session);
         return res;
       } else {

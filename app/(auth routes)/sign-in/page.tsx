@@ -2,9 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { login } from "@/lib/api/clientApi";
+import { AuthRequest, login } from "@/lib/api/clientApi";
 import { useAuthStore } from "@/lib/store/authStore";
-import type { User } from "@/types/user";
 import css from "./SignInPage.module.css";
 
 interface ApiError {
@@ -18,21 +17,23 @@ interface ApiError {
 const SignInPage = () => {
   const router = useRouter();
   const [error, setError] = useState<string>("");
-  const { setUser } = useAuthStore();
+  const setUser = useAuthStore((state) => state.setUser);
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const handleSubmit = async (formData: FormData) => {
+ 
     setError("");
 
-    const formData = new FormData(e.currentTarget);
-    const email = formData.get("email") as string;
-    const password = formData.get("password") as string;
+    const formValues = Object.fromEntries(formData) as AuthRequest;
+
 
     try {
-  const response = await login(email, password);
-  const user: User = response.user;
-  setUser(user);
-  router.push("/profile");
+  const response = await login(formValues);
+      if (response) {
+        setUser(response);
+        router.push("/profile");
+  }
+  
+  
 } catch (err: unknown) {
   const apiErr = err as ApiError;
   setError(apiErr.response?.data?.message || "Login failed");
@@ -42,7 +43,7 @@ const SignInPage = () => {
 
   return (
     <main className={css.mainContent}>
-      <form className={css.form} onSubmit={handleSubmit}>
+      <form className={css.form} action={handleSubmit}>
         <h1 className={css.formTitle}>Sign in</h1>
 
         <div className={css.formGroup}>

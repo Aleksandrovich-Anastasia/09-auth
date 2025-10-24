@@ -1,18 +1,24 @@
 'use client';
 
-import { ReactNode, useEffect } from 'react';
+import { useAuthStore } from '@/lib/store/authStore';
 import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
-interface AuthLayoutProps {
-  children: ReactNode;
-}
+export default function PublicLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  const [loading, setLoading] = useState(true);
+  const clearIsAuthenticated = useAuthStore((state) => state.clearIsAuthenticated);
 
-export default function AuthLayout({ children }: AuthLayoutProps) {
   const router = useRouter();
 
   useEffect(() => {
+    clearIsAuthenticated();
     router.refresh();
-  }, [router]);
+    setLoading(false);
+  }, [clearIsAuthenticated, router]);
 
-  return <>{children}</>;
+  return <>{loading ? <div>Loading...</div> : children}</>;
 }
