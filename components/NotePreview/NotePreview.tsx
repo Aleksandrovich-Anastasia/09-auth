@@ -34,7 +34,7 @@ export default function NotePreview({ noteId, onClose }: NotePreviewProps) {
 
   return (
     <Modal onClose={handleClose}>
-      {&& <Loader />}
+      {loading && <Loader />}
       {note && (
         <div>
           <h2>{note.title}</h2>
