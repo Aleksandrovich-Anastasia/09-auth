@@ -1,59 +1,58 @@
-"use client";
+'use client';
+import { getMe, checkSession } from '../../lib/api/clientApi';
+import { useAuthStore } from '../../lib/store/authStore';
+import { useEffect, useState } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
+import Loader from '../../app/loading';
 
-import { useEffect, useState } from "react";
-import { useRouter, usePathname } from "next/navigation";
-import { checkSession } from "@/lib/api/clientApi";
-import { useAuthStore } from "@/lib/store/authStore";
-import css from "./AuthProvider.module.css";
-import type { User } from "@/types/user";
+type Props = {
+  children: React.ReactNode;};
 
-const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const router = useRouter();
-  const pathname = usePathname();
-  const { setUser, clearIsAuthenticated } = useAuthStore();
+const privateRoutes = ['/profile']
+
+const AuthProvider = ({ children }: Props) => {
+  const setUser = useAuthStore((state) => state.setUser);
+  const clearIsAuthenticated = useAuthStore((state) => state.clearIsAuthenticated);
   const [loading, setLoading] = useState(true);
-  const [isClient, setIsClient] = useState(false);
+  const pathname = usePathname();
+  const router = useRouter();
 
   useEffect(() => {
-    setIsClient(true);
-  }, []);
+    const fetchUser = async () => {
+      setLoading(true);
 
-  useEffect(() => {
-    if (!isClient) return;
-
-    const verifySession = async () => {
       try {
-        const response = await checkSession();
-        const user: User | null = response?.user ?? null;
+        const isAuthenticated = await checkSession();
 
-        if (user) {
-          setUser(user);
+        if (isAuthenticated) {
+          const user = await getMe();
+          if (user) {
+            setUser(user);
+          } else {
+            clearIsAuthenticated();
+          }
         } else {
           clearIsAuthenticated();
-          if (pathname.startsWith("/profile") || pathname.startsWith("/notes")) {
-            router.push("/sign-in");
+
+          const isPrivate = privateRoutes.some((route) => pathname.startsWith(route));
+          if (isPrivate) {
+            router.replace('/login'); 
+            return;
           }
         }
-      } catch (err) {
-        console.error("Session check failed:", err);
+      } catch (error) {
+        console.error('Auth check failed:', error);
         clearIsAuthenticated();
-        if (pathname.startsWith("/profile") || pathname.startsWith("/notes")) {
-          router.push("/sign-in");
-        }
       } finally {
         setLoading(false);
       }
     };
 
-    verifySession();
-  }, [isClient, pathname, router, setUser, clearIsAuthenticated]);
+    fetchUser();
+  }, [pathname, setUser, clearIsAuthenticated, router]);
 
-  if (!isClient || loading) {
-    return (
-      <div className={css.loaderWrapper}>
-        <span className={css.loader}></span>
-      </div>
-    );
+  if (loading) {
+    return <Loader />;
   }
 
   return <>{children}</>;
